@@ -119,7 +119,6 @@ $url=request_uri;
 $routes = require os_path(APP_PATH . 'routes.php');
 
 $path = '';
-var_dump($routes);
 
 if($route = route_match($request_uri, $routes)){
     if(strtolower($route['for']) === 'admin') {
@@ -150,6 +149,7 @@ defined('auth_user_mode') OR define('auth_user_mode', false);
 //Sets the required themeand user details
 $id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
 
+
 if( admin_mode ) {
     $theme = 'theme.admin';
 } else if ( auth_user_mode && admin_mode === false) {
@@ -158,22 +158,21 @@ if( admin_mode ) {
     $theme = 'theme';
 }
 
-if($user = load_user_data($id, admin_mode) ) {
-    if($user->blocked) {
-        session_destroy();
-        redirect("/");
+
+// Attempts to get if the desired route requires logiged in state
+if($subPath == 'admin' || $subPath == 'dashboard') {
+    if ($user = load_user_data($id, admin_mode)) {
+        if ($user->blocked) {
+            session_destroy();
+            redirect("/");
+        }
+    } else {
+        $user = array('id' => 0, 'first' => '', 'last' => '', 'email' => '', 'blocked' => 0);
+        $user = (object)$user;
+        if (!is_string(strchr($request_uri, 'login')))
+            redirect(base_url . $subPath . "/login");
     }
-} else {
-    $user=array('id'=>0,'first'=>'','last'=>'','email'=>'','blocked'=>0);
-    $user=(object) $user;
-    if(!is_string(strchr($request_uri, 'login')))
-        redirect(base_url. $subPath ."/login");
 }
-
-var_dump($user);
-
-
-
 
 // Loads user data if we are in admin mode or authorized user mode
 //start output buffering
