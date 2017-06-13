@@ -27,7 +27,7 @@ define('IMAGES',FCPATH.'static/images/');
 define('APP_PATH', dirname(__FILE__) . '/../app/');
 
 //Title for the site
-define ('site_title','Hotelshub');
+define ('site_title','Anambra State');
 
 //Default time zone ( Change to yours )
 date_default_timezone_set('Africa/Lagos');
@@ -91,7 +91,7 @@ define('request_uri', $request_uri);
 define('request_url', $request_url);
 define('current_url', base_url.request_url);
 define('APP_MODE', $app_mode);
-
+define('base_image_path', base_url . "assets/images/");
 
 include dirname(__FILE__)."/lib/api.php";
 
@@ -114,8 +114,7 @@ if($settings=$db->dlookup('*','settings',' id = 1')) {
 //get the url
 $url=request_uri;
 
-
-//include dirname(__DIR__);
+// Fetches all the specified routes
 $routes = require os_path(APP_PATH . 'routes.php');
 
 $path = '';
@@ -134,8 +133,22 @@ if($route = route_match($request_uri, $routes)){
 
     $subPath = $route['for'];
     $file = $route['file'];
+    $temp = os_path(APP_PATH . $route['for'] . '/' . "template.php");
+    $route_file = os_path(APP_PATH . $route['for'] . '/pages/'. $route['file'] .'.php');
+    $route_fragment = os_path(APP_PATH . $route['for'] . '/fragments/');
+    
+    defined('temp_path') OR define('temp_path', $temp);
+    defined('route_file') OR define('route_file', $route_file);
+    defined('route_fragments') OR define('route_fragments', $route_fragment);
+
+    
+
+//    var_dump(file_exists($temp));    var_dump($route_file);
+
     if( empty($subPath)) {
         $path = os_path(APP_PATH . "{$file}.php");
+    } else if(isset($route['use_temp']) && $route['use_temp']) {
+        $path = $temp;
     } else {
         $path = os_path(APP_PATH . "{$subPath}/{$file}.php");
     }
@@ -149,7 +162,6 @@ defined('auth_user_mode') OR define('auth_user_mode', false);
 //Sets the required themeand user details
 $id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
 
-
 if( admin_mode ) {
     $theme = 'theme.admin';
 } else if ( auth_user_mode && admin_mode === false) {
@@ -158,21 +170,20 @@ if( admin_mode ) {
     $theme = 'theme';
 }
 
-
-// Attempts to get if the desired route requires logiged in state
-if($subPath == 'admin' || $subPath == 'dashboard') {
-    if ($user = load_user_data($id, admin_mode)) {
-        if ($user->blocked) {
+if($subPath == "admin" || $subPath == "dashboard") {
+    if($user = load_user_data($id, admin_mode) ) {
+        if($user->blocked) {
             session_destroy();
             redirect("/");
         }
     } else {
-        $user = array('id' => 0, 'first' => '', 'last' => '', 'email' => '', 'blocked' => 0);
-        $user = (object)$user;
-        if (!is_string(strchr($request_uri, 'login')))
-            redirect(base_url . $subPath . "/login");
+        $user=array('id'=>0,'first'=>'','last'=>'','email'=>'','blocked'=>0);
+        $user=(object) $user;
+        if(!is_string(strchr($request_uri, 'login')))
+            redirect(base_url. $subPath ."/login");
     }
 }
+
 
 // Loads user data if we are in admin mode or authorized user mode
 //start output buffering
@@ -184,7 +195,7 @@ if(file_exists($path)) {
 } else {
     echo "<span style='display: block; color: red; border: .5px solid red; padding: 5px 5px; font-size: 25px; text-align: center'>
                <b>
-                    {$path} can not be resolved 
+                    {$path} can not be resolved
                 </b>
           </span>";
 }

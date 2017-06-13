@@ -277,3 +277,23 @@ function os_path ($path) {
 function prevent_d_access() {
     defined('EXEC') or die('Unauthorized Access/Accessing through unverified route');
 }
+
+function is_active_link($route = "/") {
+    return request_uri == $route ? "active" : "";
+}
+
+function load_fragment($name, $from='route') {
+    
+    switch($from) {
+        case 'route': {
+            $fragment = os_path(route_fragments . $name . '.php');
+        }
+    }
+    
+    require ($fragment);
+    
+}
+
+function get_image($name) {
+    return os_path(base_image_path . $name);
+}
