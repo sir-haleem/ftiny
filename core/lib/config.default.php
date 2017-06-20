@@ -14,10 +14,10 @@ if(APP_MODE == 'DEV') {
     $pass="";
     $dbname="hotelshub_burial";
 } else {
-    $host="localhost";
-    $user="hotelshu_hubuser";
-    $pass="lagos@1234";
-    $dbname="hotelshu_hub_burial";
+    $host="";
+    $user="";
+    $pass="";
+    $dbname="";
 }
 
 
